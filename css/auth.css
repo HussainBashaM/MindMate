@@ -1,0 +1,25 @@
+.auth-wrap{
+  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+}
+.auth-card{
+  width:100%; max-width:420px; padding:40px 36px;
+}
+.auth-card .logo{ justify-content:center; margin-bottom:28px; }
+.auth-card h1{ font-size:24px; text-align:center; margin-bottom:6px; }
+.auth-card .subtitle{ text-align:center; color:var(--text-dim); font-size:14px; margin-bottom:28px; }
+.form-group{ margin-bottom:16px; }
+.password-field{ position:relative; }
+.toggle-pass{
+  position:absolute; right:14px; top:50%; transform: translateY(-50%);
+  background:none; color:var(--text-faint); font-size:13px;
+}
+.row-between{ display:flex; align-items:center; justify-content:space-between; font-size:13px; margin:14px 0 20px; color: var(--text-dim); }
+.checkbox-line{ display:flex; align-items:center; gap:8px; }
+.auth-card .btn{ width:100%; margin-top:4px; }
+.auth-footer{ text-align:center; margin-top:22px; font-size:14px; color:var(--text-dim); }
+.auth-footer a{ color: var(--violet); font-weight:600; }
+.divider{ display:flex; align-items:center; gap:12px; margin:22px 0; color:var(--text-faint); font-size:12px; }
+.divider::before,.divider::after{ content:''; flex:1; height:1px; background: var(--panel-border); }
+.social-row{ display:flex; gap:12px; }
+.social-btn{ flex:1; }
+.error-msg{ color: var(--red); font-size:13px; margin-top:10px; text-align:center; min-height:16px; }

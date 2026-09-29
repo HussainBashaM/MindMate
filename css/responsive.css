@@ -1,0 +1,32 @@
+@media (max-width: 900px){
+  .nav-links{ display:none; }
+  .feature-grid{ grid-template-columns: 1fr 1fr; }
+  .form-grid{ grid-template-columns:1fr; }
+}
+
+@media (max-width: 768px){
+  .sidebar{
+    position:fixed; z-index:200; top:0; left:0; height:100vh;
+    transform: translateX(-100%);
+  }
+  .sidebar.open{ transform:none; box-shadow: 0 0 60px rgba(0,0,0,0.6); }
+  .hamburger{ display:flex; }
+  .app-shell{ position:relative; }
+  .sidebar-overlay{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:150;
+  }
+  .sidebar-overlay.show{ display:block; }
+  .msg-bubble-wrap{ max-width:88%; }
+  .suggestion-grid{ grid-template-columns:1fr; }
+  .stat-grid{ grid-template-columns: 1fr 1fr; }
+  .feature-grid{ grid-template-columns: 1fr; }
+  .hero{ padding-top:60px; }
+  .dash-main{ padding: 24px 5vw 50px; }
+}
+
+@media (max-width: 480px){
+  .auth-card{ padding:28px 22px; }
+  .navbar{ padding:14px 4vw; }
+  .stat-grid{ grid-template-columns: 1fr; }
+  .composer-wrap{ padding:10px 10px 16px; }
+}
