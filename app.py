@@ -374,11 +374,19 @@ def call_llm(messages, system_prompt=None):
         )
 
         if response.status_code != 200:
-            print("OpenAI API Error:", response.text)
-            return None, (
-                "Sorry, I couldn't connect to the AI service right now. "
-                "Please try again."
-            )
+    print("OPENAI STATUS:", response.status_code)
+    print("OPENAI ERROR:", response.text)
+
+    try:
+        error_data = response.json()
+        error_message = error_data.get("error", {}).get(
+            "message",
+            "Unknown OpenAI error"
+        )
+    except Exception:
+        error_message = "Unknown OpenAI error"
+
+    return None, f"OpenAI error {response.status_code}: {error_message}"
 
         data = response.json()
 
