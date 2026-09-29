@@ -34,7 +34,7 @@ load_dotenv()
 # Config
 # ---------------------------------------------------------------------------
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-me")
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/mindmate")
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://bashamhussain83_db_user:MSbgtgexhgEUr4iI@cluster0.uqayfii.mongodb.net/?appName=Cluster0")
 AI_API_KEY = os.environ.get("AI_API_KEY", "")
 AI_MODEL = os.environ.get("AI_MODEL", "claude-sonnet-4-6")
 WEATHER_API_KEY = os.environ.get("WEATHER_API_KEY", "")
