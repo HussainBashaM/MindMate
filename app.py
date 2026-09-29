@@ -36,7 +36,7 @@ load_dotenv()
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/mindmate")
 AI_API_KEY = os.environ.get("AI_API_KEY", "")
-AI_MODEL = os.environ.get("AI_MODEL", "claude-sonnet-4-6")
+AI_MODEL = os.environ.get("AI_MODEL", "gpt-5.6-luna")
 WEATHER_API_KEY = os.environ.get("WEATHER_API_KEY", "")
 NEWS_API_KEY = os.environ.get("NEWS_API_KEY", "")
 JWT_EXP_DAYS = 7
@@ -348,34 +348,75 @@ def detect_tool(message):
 # AI CALL — real LLM request with conversation memory
 # ---------------------------------------------------------------------------
 def call_llm(messages, system_prompt=None):
-    """messages: list of {'role': 'user'|'assistant', 'content': str}"""
     if not AI_API_KEY:
-        return None, ("AI is not configured yet. Add AI_API_KEY to your .env file "
-                       "(an Anthropic API key from console.anthropic.com) to enable real responses.")
+        return None, (
+            "AI is not configured yet. "
+            "Please add AI_API_KEY to your environment variables."
+        )
+
     try:
-        resp = requests.post(
-            "https://api.anthropic.com/v1/messages",
+        response = requests.post(
+            "https://api.openai.com/v1/responses",
             headers={
-                "x-api-key": AI_API_KEY,
-                "anthropic-version": "2023-06-01",
-                "content-type": "application/json",
+                "Authorization": f"Bearer {AI_API_KEY}",
+                "Content-Type": "application/json"
             },
             json={
                 "model": AI_MODEL,
-                "max_tokens": 1024,
-                "system": system_prompt or "You are MindMate, a helpful, friendly AI assistant.",
-                "messages": messages,
+                "instructions": system_prompt or (
+                    "You are MindMate AI, a helpful, friendly and intelligent "
+                    "AI assistant. Give clear, natural and useful answers."
+                ),
+                "input": messages,
+                "max_output_tokens": 1024
             },
-            timeout=30,
+            timeout=60
         )
-        if resp.status_code != 200:
-            return None, "Sorry, I'm having trouble connecting right now. Please try again."
-        data = resp.json()
-        text_parts = [b["text"] for b in data.get("content", []) if b.get("type") == "text"]
-        return "".join(text_parts).strip() or "…", None
-    except requests.RequestException:
-        return None, "Sorry, I'm having trouble connecting right now. Please try again."
 
+        if response.status_code != 200:
+            print("OpenAI API Error:", response.text)
+            return None, (
+                "Sorry, I couldn't connect to the AI service right now. "
+                "Please try again."
+            )
+
+        data = response.json()
+
+        answer = data.get("output_text")
+
+        if not answer:
+            parts = []
+
+            for item in data.get("output", []):
+                for content in item.get("content", []):
+                    if content.get("type") == "output_text":
+                        parts.append(content.get("text", ""))
+
+            answer = "".join(parts)
+
+        if not answer:
+            return None, "The AI returned an empty response."
+
+        return answer.strip(), None
+
+    except requests.Timeout:
+        return None, (
+            "The AI service took too long to respond. "
+            "Please try again."
+        )
+
+    except requests.RequestException as e:
+        print("OpenAI connection error:", e)
+        return None, (
+            "Unable to connect to the AI service. "
+            "Please try again."
+        )
+
+    except Exception as e:
+        print("AI error:", e)
+        return None, (
+            "Something went wrong while generating the AI response."
+        )
 
 # ---------------------------------------------------------------------------
 # CHAT ROUTES
