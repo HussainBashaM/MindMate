@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat — MindMate</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/chat.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="logo"><div class="logo-mark">✨</div> MindMate</div>
+
+    <button class="btn btn-primary new-chat-btn" id="new-chat-btn">+ New Chat</button>
+
+    <nav class="sidebar-nav">
+      <a class="sidebar-link active" href="chat.html">💬 Chat</a>
+      <a class="sidebar-link" href="history.html">🕘 History</a>
+      <a class="sidebar-link" href="#" onclick="showToast('Tools route automatically inside chat — try asking about weather, news, or a calculation!', 'info')">🛠️ Tools</a>
+      <a class="sidebar-link" href="settings.html">⚙️ Settings</a>
+    </nav>
+
+    <div class="sidebar-section-title">Recent</div>
+    <div class="history-list" id="history-list">
+      <div class="skeleton" style="height:34px;margin-bottom:6px;"></div>
+      <div class="skeleton" style="height:34px;margin-bottom:6px;"></div>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="profile.html" class="user-chip" data-user-chip style="display:flex;"></a>
+      <a href="#" class="sidebar-link" data-logout style="margin-top:4px;">🚪 Logout</a>
+    </div>
+  </aside>
+
+  <main class="chat-main">
+    <div class="chat-topbar">
+      <div class="topbar-left">
+        <button class="hamburger">☰</button>
+        <div>
+          <div id="conversation-title" style="font-weight:600;font-size:15px;">New Chat</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="model-badge"><span class="status-dot"></span> MindMate AI</div>
+      </div>
+    </div>
+
+    <div class="messages-area" id="messages-area">
+      <div class="messages-inner" id="messages-inner"></div>
+    </div>
+
+    <div class="composer-wrap">
+      <form class="glass composer" id="composer-form">
+        <button type="button" class="composer-icon-btn" title="Attach" onclick="showToast('File attachments are coming soon.', 'info')">📎</button>
+        <textarea id="composer-input" rows="1" placeholder="Message MindMate…"></textarea>
+        <button type="button" class="composer-icon-btn" title="Voice input" onclick="showToast('Voice input is coming soon.', 'info')">🎤</button>
+        <button type="submit" class="send-btn" id="send-btn" disabled>➤</button>
+      </form>
+      <div class="composer-hint">Enter to send • Shift+Enter for a new line</div>
+    </div>
+  </main>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/chat.js"></script>
+<script>
+  // Deep-link support: chat.html?c=<conversationId>
+  (function(){
+    const id = new URLSearchParams(window.location.search).get("c");
+    if (id) window.addEventListener("DOMContentLoaded", () => setTimeout(() => loadConversation(id), 300));
+  })();
+</script>
+</body>
+</html>

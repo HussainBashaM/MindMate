@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat History — MindMate</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/chat.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="logo"><div class="logo-mark">✨</div> MindMate</div>
+    <a href="chat.html" class="btn btn-primary new-chat-btn" style="text-decoration:none;">+ New Chat</a>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link" href="chat.html">💬 Chat</a>
+      <a class="sidebar-link active" href="history.html">🕘 History</a>
+      <a class="sidebar-link" href="settings.html">⚙️ Settings</a>
+    </nav>
+    <div class="sidebar-footer" style="margin-top:auto;">
+      <a href="profile.html" class="user-chip" data-user-chip style="display:flex;"></a>
+      <a href="#" class="sidebar-link" data-logout style="margin-top:4px;">🚪 Logout</a>
+    </div>
+  </aside>
+
+  <main class="dash-main" style="overflow-y:auto;">
+    <div class="dash-header">
+      <button class="hamburger" style="margin-bottom:10px;">☰</button>
+      <h1>Chat History</h1>
+      <p>All your past conversations, searchable and organized.</p>
+    </div>
+
+    <input class="input search-bar" id="history-search" type="text" placeholder="Search conversations…">
+
+    <div class="glass card" style="padding:0;overflow:hidden;">
+      <table class="history-table">
+        <thead><tr><th>Title</th><th>Last message</th><th>Updated</th><th>Actions</th></tr></thead>
+        <tbody id="history-tbody"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+<script src="js/app.js"></script>
+<script src="js/history.js"></script>
+</body>
+</html>

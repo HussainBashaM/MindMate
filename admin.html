@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — MindMate</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<main class="dash-main" style="max-width:1100px;">
+  <div class="dash-header" style="display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <h1>Admin Dashboard</h1>
+      <p>MindMate platform overview</p>
+    </div>
+    <a href="#" data-logout class="btn btn-secondary">Logout</a>
+  </div>
+
+  <nav class="admin-nav">
+    <a href="admin.html" class="active">Dashboard</a>
+    <a href="chat.html">Back to App</a>
+  </nav>
+
+  <div class="stat-grid">
+    <div class="glass stat-card"><div class="stat-value gradient-text" id="stat-total-users">–</div><div class="stat-label">Total Users</div></div>
+    <div class="glass stat-card"><div class="stat-value gradient-text" id="stat-active-users">–</div><div class="stat-label">Active Users (7d)</div></div>
+    <div class="glass stat-card"><div class="stat-value gradient-text" id="stat-total-conversations">–</div><div class="stat-label">Total Conversations</div></div>
+    <div class="glass stat-card"><div class="stat-value gradient-text" id="stat-total-messages">–</div><div class="stat-label">Total Messages</div></div>
+  </div>
+
+  <div class="glass card">
+    <div class="card-title">Popular Tools</div>
+    <div class="bar-chart" id="tools-chart"></div>
+  </div>
+
+  <div class="glass card" style="padding:0;overflow:hidden;">
+    <div class="card-title" style="padding:20px 20px 0;">Recent Users</div>
+    <table class="history-table">
+      <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th></tr></thead>
+      <tbody id="admin-users-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="glass card" style="padding:0;overflow:hidden;">
+    <div class="card-title" style="padding:20px 20px 0;">Recent Conversations</div>
+    <table class="history-table">
+      <thead><tr><th>Title</th><th>Last Message</th><th>Updated</th></tr></thead>
+      <tbody id="admin-convos-tbody"></tbody>
+    </table>
+  </div>
+</main>
+<script src="js/app.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
