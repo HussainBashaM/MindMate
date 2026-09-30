@@ -35,8 +35,8 @@ load_dotenv()
 # ---------------------------------------------------------------------------
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/mindmate")
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-AI_MODEL = os.environ.get("AI_MODEL", "gemini-3.7-flash")
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+AI_MODEL = os.environ.get("AI_MODEL", "openrouter/free")
 WEATHER_API_KEY = os.environ.get("WEATHER_API_KEY", "")
 NEWS_API_KEY = os.environ.get("NEWS_API_KEY", "")
 JWT_EXP_DAYS = 7
@@ -348,90 +348,104 @@ def detect_tool(message):
 # AI CALL — real LLM request with conversation memory
 # ---------------------------------------------------------------------------
 def call_llm(messages, system_prompt=None):
-    if not GEMINI_API_KEY:
+    """
+    Send conversation to OpenRouter's free model router.
+    """
+
+    if not OPENROUTER_API_KEY:
         return None, (
             "AI is not configured yet. "
-            "Please add GEMINI_API_KEY to your environment variables."
+            "Please add OPENROUTER_API_KEY to your environment variables."
         )
 
     try:
-        contents = []
+        # Build OpenRouter messages
+        openrouter_messages = []
 
+        # System instruction
+        if system_prompt:
+            openrouter_messages.append({
+                "role": "system",
+                "content": system_prompt
+            })
+        else:
+            openrouter_messages.append({
+                "role": "system",
+                "content": (
+                    "You are MindMate AI, a helpful, friendly, intelligent "
+                    "and conversational AI assistant. "
+                    "Give clear, natural and useful answers. "
+                    "Remember the conversation context and answer according "
+                    "to the user's previous messages."
+                )
+            })
+
+        # Add conversation history
         for message in messages:
             role = message.get("role", "user")
             content = message.get("content", "")
 
-            contents.append({
-                "role": "model" if role == "assistant" else "user",
-                "parts": [
-                    {
-                        "text": str(content)
-                    }
-                ]
+            # OpenRouter uses "assistant" instead of "model"
+            if role not in ["user", "assistant", "system"]:
+                role = "user"
+
+            # Don't add additional system messages
+            if role == "system":
+                continue
+
+            openrouter_messages.append({
+                "role": role,
+                "content": str(content)
             })
 
-        payload = {
-            "contents": contents,
-            "generationConfig": {
-                "maxOutputTokens": 1024,
-                "temperature": 0.7
-            }
-        }
-
-        if system_prompt:
-            payload["systemInstruction"] = {
-                "parts": [
-                    {
-                        "text": system_prompt
-                    }
-                ]
-            }
-
-        url = (
-            f"https://generativelanguage.googleapis.com/v1beta/models/"
-            f"{AI_MODEL}:generateContent?key={GEMINI_API_KEY}"
-        )
-
+        # OpenRouter API request
         response = requests.post(
-            url,
+            "https://openrouter.ai/api/v1/chat/completions",
             headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                 "Content-Type": "application/json"
             },
-            json=payload,
+            json={
+                "model": AI_MODEL,
+                "messages": openrouter_messages,
+                "max_tokens": 1024,
+                "temperature": 0.7
+            },
             timeout=60
         )
 
+        # API error
         if response.status_code != 200:
-            print("Gemini API Error:", response.text)
+            print("OpenRouter API Error:", response.text)
 
             try:
                 error_data = response.json()
-                message = error_data.get("error", {}).get(
-                    "message",
-                    "Gemini API request failed."
+
+                error_message = (
+                    error_data
+                    .get("error", {})
+                    .get("message", "OpenRouter API request failed.")
                 )
+
             except Exception:
-                message = "Gemini API request failed."
+                error_message = "OpenRouter API request failed."
 
-            return None, f"AI service error: {message}"
+            return None, f"AI service error: {error_message}"
 
+        # Parse response
         data = response.json()
 
-        candidates = data.get("candidates", [])
+        choices = data.get("choices", [])
 
-        if not candidates:
-            return None, "Gemini returned an empty response."
+        if not choices:
+            return None, "OpenRouter returned an empty response."
 
-        parts = candidates[0].get("content", {}).get("parts", [])
+        message_data = choices[0].get("message", {})
 
-        answer = "".join(
-            part.get("text", "")
-            for part in parts
-            if part.get("text")
-        )
+        answer = message_data.get("content", "")
 
         if not answer:
-            return None, "Gemini returned an empty response."
+            return None, "The AI returned an empty response."
 
         return answer.strip(), None
 
@@ -442,7 +456,8 @@ def call_llm(messages, system_prompt=None):
         )
 
     except requests.RequestException as e:
-        print("Gemini connection error:", e)
+        print("OpenRouter connection error:", e)
+
         return None, (
             "Unable to connect to the AI service. "
             "Please try again."
@@ -450,11 +465,12 @@ def call_llm(messages, system_prompt=None):
 
     except Exception as e:
         print("AI error:", e)
+
         return None, (
             "Something went wrong while generating "
             "the AI response."
         )
-
+        
 # ---------------------------------------------------------------------------
 # CHAT ROUTES
 # ---------------------------------------------------------------------------
