@@ -35,8 +35,8 @@ load_dotenv()
 # ---------------------------------------------------------------------------
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/mindmate")
-AI_API_KEY = os.environ.get("AI_API_KEY", "")
-AI_MODEL = os.environ.get("AI_MODEL", "gpt-5.6-luna")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+AI_MODEL = os.environ.get("AI_MODEL", "gemini-2.5-flash")
 WEATHER_API_KEY = os.environ.get("WEATHER_API_KEY", "")
 NEWS_API_KEY = os.environ.get("NEWS_API_KEY", "")
 JWT_EXP_DAYS = 7
@@ -348,62 +348,90 @@ def detect_tool(message):
 # AI CALL — real LLM request with conversation memory
 # ---------------------------------------------------------------------------
 def call_llm(messages, system_prompt=None):
-    if not AI_API_KEY:
+    if not GEMINI_API_KEY:
         return None, (
             "AI is not configured yet. "
-            "Please add AI_API_KEY to your environment variables."
+            "Please add GEMINI_API_KEY to your environment variables."
         )
 
     try:
+        contents = []
+
+        for message in messages:
+            role = message.get("role", "user")
+            content = message.get("content", "")
+
+            contents.append({
+                "role": "model" if role == "assistant" else "user",
+                "parts": [
+                    {
+                        "text": str(content)
+                    }
+                ]
+            })
+
+        payload = {
+            "contents": contents,
+            "generationConfig": {
+                "maxOutputTokens": 1024,
+                "temperature": 0.7
+            }
+        }
+
+        if system_prompt:
+            payload["systemInstruction"] = {
+                "parts": [
+                    {
+                        "text": system_prompt
+                    }
+                ]
+            }
+
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{AI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+        )
+
         response = requests.post(
-            "https://api.openai.com/v1/responses",
+            url,
             headers={
-                "Authorization": f"Bearer {AI_API_KEY}",
                 "Content-Type": "application/json"
             },
-            json={
-                "model": AI_MODEL,
-                "instructions": system_prompt or (
-                    "You are MindMate AI, a helpful, friendly and intelligent "
-                    "AI assistant. Give clear, natural and useful answers."
-                ),
-                "input": messages,
-                "max_output_tokens": 1024
-            },
+            json=payload,
             timeout=60
         )
 
         if response.status_code != 200:
-    print("OPENAI STATUS:", response.status_code)
-    print("OPENAI ERROR:", response.text)
+            print("Gemini API Error:", response.text)
 
-    try:
-        error_data = response.json()
-        error_message = error_data.get("error", {}).get(
-            "message",
-            "Unknown OpenAI error"
-        )
-    except Exception:
-        error_message = "Unknown OpenAI error"
+            try:
+                error_data = response.json()
+                message = error_data.get("error", {}).get(
+                    "message",
+                    "Gemini API request failed."
+                )
+            except Exception:
+                message = "Gemini API request failed."
 
-    return None, f"OpenAI error {response.status_code}: {error_message}"
+            return None, f"AI service error: {message}"
 
         data = response.json()
 
-        answer = data.get("output_text")
+        candidates = data.get("candidates", [])
+
+        if not candidates:
+            return None, "Gemini returned an empty response."
+
+        parts = candidates[0].get("content", {}).get("parts", [])
+
+        answer = "".join(
+            part.get("text", "")
+            for part in parts
+            if part.get("text")
+        )
 
         if not answer:
-            parts = []
-
-            for item in data.get("output", []):
-                for content in item.get("content", []):
-                    if content.get("type") == "output_text":
-                        parts.append(content.get("text", ""))
-
-            answer = "".join(parts)
-
-        if not answer:
-            return None, "The AI returned an empty response."
+            return None, "Gemini returned an empty response."
 
         return answer.strip(), None
 
@@ -414,7 +442,7 @@ def call_llm(messages, system_prompt=None):
         )
 
     except requests.RequestException as e:
-        print("OpenAI connection error:", e)
+        print("Gemini connection error:", e)
         return None, (
             "Unable to connect to the AI service. "
             "Please try again."
@@ -423,7 +451,8 @@ def call_llm(messages, system_prompt=None):
     except Exception as e:
         print("AI error:", e)
         return None, (
-            "Something went wrong while generating the AI response."
+            "Something went wrong while generating "
+            "the AI response."
         )
 
 # ---------------------------------------------------------------------------
