@@ -36,8 +36,8 @@ load_dotenv()
 # ---------------------------------------------------------------------------
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/mindmate")
-AI_API_KEY = os.environ.get("AI_API_KEY", "")
-AI_MODEL = os.environ.get("AI_MODEL", "claude-sonnet-5")
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+AI_MODEL = os.environ.get("AI_MODEL", "openrouter/free")
 WEATHER_API_KEY = os.environ.get("WEATHER_API_KEY", "")
 NEWS_API_KEY = os.environ.get("NEWS_API_KEY", "")
 JWT_EXP_DAYS = 7
